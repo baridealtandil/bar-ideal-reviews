@@ -1,4 +1,4 @@
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '277414788395-n56bvng86992f6hfkc57o78aeoplrco0';
+const CLIENT_ID = '277414788395-n56bvng86992f6hfkc57o78aeoplrco0';
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = 'https://bar-ideal-reviews.vercel.app/api/auth';
 const MAKE_API_TOKEN = 'c941991c-0e0a-4e15-80fe-8425868afe57';
@@ -24,10 +24,26 @@ export default async function handler(req, res) {
   });
   const tokens = await tokenRes.json();
   if (tokens.error) return res.status(400).json(tokens);
+  
+  // Guardar en Make data store usando PUT (crea o reemplaza)
   const makeHeaders = { 'Authorization': 'Token ' + MAKE_API_TOKEN, 'Content-Type': 'application/json' };
-  await fetch('https://' + MAKE_ZONE + '/api/v2/data-stores/111525/data', {
-    method: 'POST', headers: makeHeaders,
-    body: JSON.stringify({ key: 'google_tokens', data: { refresh_token: tokens.refresh_token, access_token: tokens.access_token, savedAt: new Date().toISOString() } })
+  const saveRes = await fetch('https://' + MAKE_ZONE + '/api/v2/data-stores/111525/data/google_tokens', {
+    method: 'PUT',
+    headers: makeHeaders,
+    body: JSON.stringify({ 
+      key: 'google_tokens', 
+      data: { 
+        refresh_token: tokens.refresh_token, 
+        access_token: tokens.access_token, 
+        savedAt: new Date().toISOString() 
+      } 
+    })
   });
-  res.status(200).send('<h1>Autorizacion exitosa!</h1><p>Token guardado. Cerra esta ventana y hace clic en Sincronizar en el dashboard.</p>');
+  const saved = await saveRes.json();
+  
+  if (tokens.refresh_token) {
+    res.status(200).send('<h1>Autorizacion exitosa!</h1><p>Token guardado correctamente. Ya podes cerrar esta ventana.</p><p>Refresh token: ' + tokens.refresh_token.substring(0,20) + '...</p>');
+  } else {
+    res.status(400).json({ error: 'No se obtuvo refresh_token', tokens_keys: Object.keys(tokens) });
+  }
 }
