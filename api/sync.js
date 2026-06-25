@@ -10,8 +10,7 @@ const EMPLEADOS = ['Lucia C','Lucia L','Lucía C','Lucía L','Sofia L','Sofia I'
 
 async function getAccessToken(rt) {
   const r = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ refresh_token: rt, client_id: CLIENT_ID, client_secret: CLIENT_SECRET, grant_type: 'refresh_token' })
   });
   const d = await r.json();
@@ -25,19 +24,19 @@ export default async function handler(req, res) {
   try {
     const makeHeaders = { 'Authorization': 'Token ' + MAKE_API_TOKEN, 'Content-Type': 'application/json' };
     
-    // Leer refresh token del data store dedicado
-    const tokenRes = await fetch('https://' + MAKE_ZONE + '/api/v2/data-stores/' + DATASTORE_TOKEN + '/data/token', { headers: makeHeaders });
+    // Leer token — endpoint correcto es /data (lista)
+    const tokenRes = await fetch('https://' + MAKE_ZONE + '/api/v2/data-stores/' + DATASTORE_TOKEN + '/data', { headers: makeHeaders });
     const tokenData = await tokenRes.json();
-    const refreshToken = tokenData.record?.data?.refresh_token;
+    const refreshToken = tokenData.records?.[0]?.data?.refresh_token;
     
     if (!refreshToken) return res.status(401).json({ 
       error: 'No autorizado. Ir a /api/auth primero.',
-      authUrl: 'https://bar-ideal-reviews.vercel.app/api/auth'
+      authUrl: 'https://bar-ideal-reviews.vercel.app/api/auth',
+      debug: tokenData
     });
     
     const accessToken = await getAccessToken(refreshToken);
     
-    // Paginar TODAS las reseñas
     const stats = { stars5:0, stars4:0, stars3:0, stars2:0, stars1:0, sinResponder:0, total:0 };
     const empleados = {};
     let pageToken = '', paginas = 0;
@@ -73,22 +72,19 @@ export default async function handler(req, res) {
           }
         }
       }
-      
       pageToken = d.nextPageToken || '';
       paginas++;
     } while (pageToken && paginas < 50);
     
     const promedio = stats.total > 0
-      ? Math.round(((stats.stars5*5 + stats.stars4*4 + stats.stars3*3 + stats.stars2*2 + stats.stars1) / stats.total) * 10) / 10
-      : 0;
+      ? Math.round(((stats.stars5*5+stats.stars4*4+stats.stars3*3+stats.stars2*2+stats.stars1)/stats.total)*10)/10 : 0;
     const tasaRespuesta = stats.total > 0
-      ? Math.round(((stats.total - stats.sinResponder) / stats.total) * 100)
-      : 0;
+      ? Math.round(((stats.total-stats.sinResponder)/stats.total)*100) : 0;
     
-    // Normalizar empleados (Lucia C = Lucía C)
+    // Normalizar nombres de empleados
     const empNorm = {};
     for (const [k, v] of Object.entries(empleados)) {
-      const key = k.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const key = k.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
       if (!empNorm[key]) empNorm[key] = { nombre: k, menciones: 0, stars: 0 };
       empNorm[key].menciones += v.menciones;
       empNorm[key].stars += v.stars;
@@ -101,16 +97,14 @@ export default async function handler(req, res) {
     const statsData = {
       stars5: stats.stars5, stars4: stats.stars4, stars3: stats.stars3,
       stars2: stats.stars2, stars1: stats.stars1,
-      sinResponder: stats.sinResponder,
-      totalHistorico: stats.total,
-      promedioGeneral: promedio,
-      tasaRespuesta,
+      sinResponder: stats.sinResponder, totalHistorico: stats.total,
+      promedioGeneral: promedio, tasaRespuesta,
       empleados: JSON.stringify(rankingEmpleados),
       ultimaSync: new Date().toISOString()
     };
     
-    // Guardar stats en Make
-    await fetch('https://' + MAKE_ZONE + '/api/v2/data-stores/' + DATASTORE_STATS + '/data/current_stats', {
+    // Guardar en stats — endpoint PUT con key existente
+    await fetch('https://' + MAKE_ZONE + '/api/v2/data-stores/' + DATASTORE_STATS + '/data', {
       method: 'PUT',
       headers: makeHeaders,
       body: JSON.stringify({ key: 'current_stats', data: statsData })
@@ -118,7 +112,5 @@ export default async function handler(req, res) {
     
     res.status(200).json({ ok: true, paginas, stats: statsData, rankingEmpleados });
     
-  } catch(err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch(err) { res.status(500).json({ error: err.message }); }
 }
