@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reseñas · Bar Ideal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #181818;
+    --surface2: #222222;
+    --border: #2a2a2a;
+    --accent: #e8c547;
+    --accent-dim: rgba(232,197,71,0.12);
+    --green: #4ade80;
+    --green-dim: rgba(74,222,128,0.1);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.1);
+    --orange: #fb923c;
+    --text: #f0f0f0;
+    --text-muted: #888;
+    --text-dim: #555;
+    --star: #e8c547;
+    --radius: 10px;
+    --tab-h: 44px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .topbar-brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+  .topbar-brand span { color: var(--text-muted); font-size: 13px; font-family: 'DM Sans'; font-weight: 300; margin-left: 10px; }
+  .sync-btn {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--accent-dim); border: 1px solid var(--accent);
+    color: var(--accent); font-family: 'DM Sans'; font-size: 12px; font-weight: 600;
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: background 0.2s;
+    letter-spacing: 0.04em;
+  }
+  .sync-btn:hover { background: rgba(232,197,71,0.22); }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* LAYOUT */
+  .layout { display: flex; flex: 1; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 200px; min-width: 200px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .nav-label {
+    font-size: 10px; font-weight: 600; color: var(--text-dim);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0 20px 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 20px; cursor: pointer;
+    color: var(--text-muted); font-weight: 400; font-size: 13.5px;
+    border-left: 3px solid transparent; transition: all 0.15s;
+  }
+  .nav-item:hover { color: var(--text); background: var(--surface2); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-dim); font-weight: 500; }
+  .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+  .nav-badge {
+    margin-left: auto; background: var(--red); color: #fff;
+    font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 20px;
+  }
+
+  /* MAIN */
+  .main { flex: 1; overflow-y: auto; }
+
+  /* SECTIONS */
+  .section { display: none; padding: 28px 32px; }
+  .section.active { display: block; }
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; color: var(--text);
+    margin-bottom: 6px;
+  }
+  .section-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+
+  /* METRICS ROW */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .metric {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+  }
+  .metric-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .metric-value { font-size: 28px; font-weight: 600; line-height: 1; }
+  .metric-value.gold { color: var(--accent); }
+  .metric-value.green { color: var(--green); }
+  .metric-value.red { color: var(--red); }
+  .metric-sub { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+
+  /* STARS */
+  .stars { color: var(--star); letter-spacing: 1px; }
+
+  /* FILTERS */
+  .filters { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+  .filter-select {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    font-family: 'DM Sans'; font-size: 13px; padding: 7px 12px; border-radius: 6px; cursor: pointer;
+    outline: none;
+  }
+  .filter-select:focus { border-color: var(--accent); }
+  .filter-search {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    font-family: 'DM Sans'; font-size: 13px; padding: 7px 12px; border-radius: 6px;
+    outline: none; flex: 1; min-width: 180px;
+  }
+  .filter-search::placeholder { color: var(--text-dim); }
+  .filter-search:focus { border-color: var(--accent); }
+
+  /* REVIEW CARD */
+  .reviews-list { display: flex; flex-direction: column; gap: 14px; }
+  .review-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 22px;
+    transition: border-color 0.2s;
+  }
+  .review-card:hover { border-color: #3a3a3a; }
+  .review-card.pending { border-left: 3px solid var(--orange); }
+  .review-card.responded { border-left: 3px solid var(--green); }
+  .review-card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+  .reviewer { display: flex; align-items: center; gap: 10px; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--surface2); display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600; color: var(--accent); border: 1px solid var(--border);
+  }
+  .reviewer-name { font-weight: 500; font-size: 14px; }
+  .reviewer-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .review-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .sentiment-badge {
+    font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .sentiment-badge.pos { background: var(--green-dim); color: var(--green); }
+  .sentiment-badge.neg { background: var(--red-dim); color: var(--red); }
+  .sentiment-badge.neu { background: var(--accent-dim); color: var(--accent); }
+  .review-text { color: #ccc; font-size: 13.5px; line-height: 1.6; margin-bottom: 14px; }
+  .review-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tag {
+    font-size: 11px; padding: 3px 9px; border-radius: 20px;
+    background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border);
+  }
+  .tag.emp { background: rgba(232,197,71,0.08); color: var(--accent); border-color: rgba(232,197,71,0.2); }
+
+  /* RESPONSE AREA */
+  .response-area { border-top: 1px solid var(--border); padding-top: 14px; }
+  .response-label { font-size: 11px; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .response-existing {
+    background: var(--surface2); border-radius: 6px; padding: 12px 14px;
+    color: #bbb; font-size: 13px; line-height: 1.6; margin-bottom: 8px;
+  }
+  .response-textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-family: 'DM Sans'; font-size: 13px; line-height: 1.6;
+    padding: 12px 14px; border-radius: 6px; resize: vertical; min-height: 80px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .response-textarea:focus { border-color: var(--accent); }
+  .response-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .btn {
+    font-family: 'DM Sans'; font-size: 12px; font-weight: 600;
+    padding: 7px 14px; border-radius: 6px; cursor: pointer; border: none;
+    letter-spacing: 0.04em; transition: all 0.15s;
+  }
+  .btn-ai {
+    background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(232,197,71,0.3);
+  }
+  .btn-ai:hover { background: rgba(232,197,71,0.22); }
+  .btn-publish {
+    background: var(--green); color: #000; font-weight: 700;
+  }
+  .btn-publish:hover { background: #22c55e; }
+  .btn-ghost {
+    background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: #444; }
+
+  /* AI GENERATING */
+  .ai-generating {
+    display: none; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--accent); font-family: 'DM Mono';
+  }
+  .ai-generating.show { display: flex; }
+  .ai-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: blink 1s infinite; }
+  .ai-dot:nth-child(2) { animation-delay: 0.2s; }
+  .ai-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,100%{opacity:0.2} 50%{opacity:1} }
+
+  /* ANALYTICS */
+  .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .chart-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 22px;
+  }
+  .chart-card.full { grid-column: 1/-1; }
+  .chart-title { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 18px; }
+
+  /* BAR CHART */
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .bar-label { width: 40px; text-align: right; font-size: 12px; color: var(--text-muted); }
+  .bar-track { flex: 1; background: var(--surface2); border-radius: 4px; height: 22px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 600; color: #000; }
+  .bar-count { font-size: 12px; color: var(--text-muted); width: 28px; }
+
+  /* SENTIMENT DONUT */
+  .donut-wrap { display: flex; align-items: center; gap: 24px; }
+  .donut-legend { display: flex; flex-direction: column; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* SPARKLINE */
+  .sparkline-wrap { overflow-x: auto; }
+  .sparkline-months { display: flex; gap: 10px; }
+  .spark-col { flex: 1; min-width: 40px; }
+  .spark-bar-wrap { height: 80px; display: flex; align-items: flex-end; }
+  .spark-bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--accent); opacity: 0.7; transition: opacity 0.2s; cursor: pointer; }
+  .spark-bar:hover { opacity: 1; }
+  .spark-month { text-align: center; font-size: 10px; color: var(--text-dim); margin-top: 6px; }
+  .spark-val { text-align: center; font-size: 11px; color: var(--accent); font-family: 'DM Mono'; font-weight: 500; }
+
+  /* EMPLOYEE RANKING */
+  .emp-filters { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .emp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .emp-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 22px;
+  }
+  .emp-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .emp-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--surface2); display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 700; color: var(--accent);
+    border: 2px solid var(--border);
+  }
+  .emp-name { font-size: 16px; font-weight: 600; }
+  .emp-mentions { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .emp-rank { margin-left: auto; font-family: 'DM Mono'; font-size: 22px; font-weight: 700; color: var(--text-dim); }
+  .emp-stars-breakdown { display: flex; flex-direction: column; gap: 6px; }
+  .emp-star-row { display: flex; align-items: center; gap: 8px; }
+  .emp-star-num { font-size: 11px; color: var(--text-muted); width: 12px; text-align: right; }
+  .emp-star-icon { color: var(--star); font-size: 11px; }
+  .emp-star-bar-track { flex: 1; background: var(--surface2); border-radius: 3px; height: 10px; }
+  .emp-star-bar-fill { height: 100%; border-radius: 3px; }
+  .emp-star-count { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono'; width: 18px; text-align: right; }
+  .emp-score {
+    margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .emp-score-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .emp-score-val { font-family: 'DM Mono'; font-size: 18px; font-weight: 700; color: var(--accent); }
+
+  /* PERIOD BADGE */
+  .period-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent-dim); color: var(--accent);
+    font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;
+    border: 1px solid rgba(232,197,71,0.2); margin-bottom: 20px;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 28px; width: 560px; max-width: 95vw;
+  }
+  .modal-title { font-family: 'DM Serif Display'; font-size: 20px; margin-bottom: 6px; }
+  .modal-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--green); color: #000;
+    font-size: 13px; font-weight: 600; padding: 12px 20px; border-radius: 8px;
+    display: none; z-index: 300; align-items: center; gap: 8px;
+    animation: slideup 0.3s ease;
+  }
+  .toast.show { display: flex; }
+  @keyframes slideup { from { transform: translateY(20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+  /* BOTTOM NAV — solo mobile */
+  .bottom-nav {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .layout { flex-direction: column; }
+    .main { overflow-y: auto; }
+    .section { padding: 16px 14px; }
+
+    .bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 60px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 100;
+    }
+    .bottom-nav-item {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; cursor: pointer;
+      color: var(--text-muted); font-size: 10px;
+      font-family: "DM Sans"; font-weight: 500;
+      border-top: 2px solid transparent;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .bottom-nav-item.active {
+      color: var(--accent);
+      border-top-color: var(--accent);
+    }
+    .bottom-nav-item .nav-icon { font-size: 18px; }
+    .bottom-nav-badge {
+      position: absolute; top: 6px; right: calc(50% - 18px);
+      background: var(--red); color: #fff;
+      font-size: 9px; font-weight: 700;
+      padding: 1px 4px; border-radius: 20px;
+    }
+    .main { padding-bottom: 64px; }
+    .metrics { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .metric { padding: 14px; }
+    .metric-value { font-size: 22px; }
+    .section-title { font-size: 18px; }
+    .analytics-grid { grid-template-columns: 1fr; }
+    .chart-card.full { grid-column: 1; }
+    .review-card { padding: 14px; }
+    .review-card-head { flex-direction: column; gap: 8px; }
+    .review-meta { flex-direction: row; align-items: center; }
+    .response-actions { flex-wrap: wrap; }
+    .btn { font-size: 11px; padding: 6px 10px; }
+    #sim-card > div:first-of-type { grid-template-columns: 1fr !important; }
+    #sim-scenarios { grid-template-columns: repeat(2,1fr) !important; }
+    .emp-grid { grid-template-columns: 1fr; }
+    .donut-wrap { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .modal { padding: 20px 16px; }
+    .modal-actions { flex-direction: column; }
+    .modal-actions .btn { width: 100%; text-align: center; }
+    .filters { gap: 8px; flex-wrap: wrap; }
+    .filter-select { font-size: 12px; padding: 6px 8px; }
+    .toast { bottom: 72px; right: 12px; left: 12px; }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── RESPONSIVE ─────────────────────────────────────────────────────── */
+
+  /* Tablet — 768px */
+  @media (max-width: 768px) {
+    .topbar { padding: 0 16px; }
+    .topbar-brand span { display: none; }
+
+    .sidebar {
+      width: 56px; min-width: 56px;
+      padding: 16px 0;
+    }
+    .nav-label { display: none; }
+    .nav-item { padding: 12px 0; justify-content: center; }
+    .nav-item span:not(.nav-icon):not(.nav-badge) { display: none; }
+    .nav-icon { width: auto; font-size: 18px; }
+    .nav-badge { position: absolute; top: 6px; right: 6px; font-size: 9px; padding: 1px 4px; }
+    .nav-item { position: relative; }
+
+    .section { padding: 20px 16px; }
+    .section-title { font-size: 18px; }
+
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+
+    .analytics-grid { grid-template-columns: 1fr; }
+    .chart-card.full { grid-column: 1; }
+
+    .filters { gap: 8px; }
+    .filter-select { font-size: 12px; padding: 6px 8px; }
+
+    .response-actions { flex-wrap: wrap; }
+    .btn { font-size: 11px; padding: 6px 10px; }
+
+    /* Simulador */
+    #sim-card > div:first-of-type { grid-template-columns: 1fr !important; }
+    #sim-scenarios { grid-template-columns: repeat(2, 1fr) !important; }
+
+    .emp-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Mobile — 480px */
+  @media (max-width: 480px) {
+    .topbar { height: 48px; }
+    .sync-btn span { display: none; }
+    .sync-btn { padding: 6px 10px; }
+
+    .metrics { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .metric { padding: 14px 14px; }
+    .metric-value { font-size: 22px; }
+
+    .review-card { padding: 14px 14px; }
+    .review-card-head { flex-direction: column; gap: 10px; }
+    .review-meta { flex-direction: row; align-items: center; }
+
+    .reviewer-name { font-size: 13px; }
+
+    #sim-scenarios { grid-template-columns: 1fr 1fr !important; }
+
+    .modal { padding: 20px 16px; }
+    .modal-actions { flex-direction: column; }
+    .modal-actions .btn { width: 100%; text-align: center; justify-content: center; }
+
+    .donut-wrap { flex-direction: column; align-items: flex-start; gap: 16px; }
+
+    .section { padding: 16px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand"><img src="data:image/png;base64,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" alt="Bar Ideal" style="height:36px;width:auto;object-fit:contain;filter:brightness(0) invert(1);opacity:0.9;"></div>
+  <button class="sync-btn" onclick="loadReviews()">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">Sincronizar</span>
+  </button>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="nav-label">Panel</div>
+    <div class="nav-item active" onclick="showSection('resenas', this)">
+      <span class="nav-icon">★</span> Reseñas
+      <span class="nav-badge">8</span>
+    </div>
+    <div class="nav-item" onclick="showSection('analytics', this)">
+      <span class="nav-icon">◎</span> Analíticas
+    </div>
+    <div class="nav-item" onclick="showSection('empleados', this)">
+      <span class="nav-icon">◈</span> Empleados
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ========== RESEÑAS ========== -->
+    <div class="section active" id="sec-resenas">
+      <div class="section-title">Reseñas</div>
+      <div class="section-sub">Gestioná y respondé las reseñas de Google Business</div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Promedio general</div>
+          <div class="metric-value gold" id="met-avg">—</div>
+          <div class="metric-sub">Google Places</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Sin responder</div>
+          <div class="metric-value red" id="met-pending">—</div>
+          <div class="metric-sub">Disponible con My Business API</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Total reseñas</div>
+          <div class="metric-value" id="met-total">—</div>
+          <div class="metric-sub">Historial completo</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Última sincronización</div>
+          <div class="metric-value" id="met-sync" style="font-size:14px;padding-top:6px;">Nunca</div>
+          <div class="metric-sub">Actualizá para sincronizar</div>
+        </div>
+      </div>
+
+      <div class="filters">
+        <select class="filter-select" onchange="filterReviews()">
+          <option value="all">Todas las estrellas</option>
+          <option value="5">★★★★★ 5 estrellas</option>
+          <option value="4">★★★★ 4 estrellas</option>
+          <option value="3">★★★ 3 estrellas</option>
+          <option value="2">★★ 2 estrellas</option>
+          <option value="1">★ 1 estrella</option>
+        </select>
+        <select class="filter-select">
+          <option>Todos los estados</option>
+          <option>Sin responder</option>
+          <option>Respondidas</option>
+        </select>
+        <select class="filter-select">
+          <option>Todo el período</option>
+          <option>Hoy</option>
+          <option>Últimos 7 días</option>
+          <option>Últimos 30 días</option>
+        </select>
+        <input class="filter-search" placeholder="Buscar en reseñas…" type="text">
+      </div>
+
+      <div class="reviews-list" id="reviews-list">
+        <!-- Las reseñas se cargan dinámicamente desde Google Places API -->
+        <div id="reviews-empty" style="text-align:center;padding:48px 20px;color:var(--text-muted);">
+          <div style="font-size:32px;margin-bottom:12px;">★</div>
+          <div style="font-size:15px;margin-bottom:6px;">Sincronizá para ver las reseñas reales</div>
+          <div style="font-size:12px;color:var(--text-dim);">Hacé clic en "Sincronizar" arriba a la derecha</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== ANALÍTICAS ========== -->
+    <div class="section" id="sec-analytics">
+      <div class="section-title">Analíticas</div>
+      <div class="section-sub">Métricas de reseñas y sentimiento en el tiempo</div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Sentimiento positivo</div>
+          <div class="metric-value green">68%</div>
+          <div class="metric-sub">↑ 4% vs mes anterior</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Sentimiento negativo</div>
+          <div class="metric-value red">19%</div>
+          <div class="metric-sub">↓ 2% vs mes anterior</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Tasa de respuesta</div>
+          <div class="metric-value gold">79%</div>
+          <div class="metric-sub">Meta: 100%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Tiempo prom. respuesta</div>
+          <div class="metric-value">18h</div>
+          <div class="metric-sub">Últimos 30 días</div>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+
+        <!-- Distribución por estrellas -->
+        <div class="chart-card">
+          <div class="chart-title">Distribución por estrellas</div>
+          <div class="bar-row"><div class="bar-label">5 ★</div><div class="bar-track"><div class="bar-fill" style="width:55%;background:var(--green)">55%</div></div><div class="bar-count">191</div></div>
+          <div class="bar-row"><div class="bar-label">4 ★</div><div class="bar-track"><div class="bar-fill" style="width:22%;background:#86efac">22%</div></div><div class="bar-count">76</div></div>
+          <div class="bar-row"><div class="bar-label">3 ★</div><div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--accent)">10%</div></div><div class="bar-count">35</div></div>
+          <div class="bar-row"><div class="bar-label">2 ★</div><div class="bar-track"><div class="bar-fill" style="width:8%;background:var(--orange)">8%</div></div><div class="bar-count">28</div></div>
+          <div class="bar-row"><div class="bar-label">1 ★</div><div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--red)">5%</div></div><div class="bar-count">17</div></div>
+        </div>
+
+        <!-- Sentimiento -->
+        <div class="chart-card">
+          <div class="chart-title">Análisis de sentimiento</div>
+          <div class="donut-wrap">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--surface2)" stroke-width="18"/>
+              <!-- pos 68% -->
+              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--green)" stroke-width="18"
+                stroke-dasharray="204.2 301.6" stroke-dashoffset="75.4" stroke-linecap="butt"/>
+              <!-- neu 13% -->
+              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--accent)" stroke-width="18"
+                stroke-dasharray="39" stroke-dashoffset="-128.8" stroke-linecap="butt"/>
+              <!-- neg 19% -->
+              <circle cx="60" cy="60" r="48" fill="none" stroke="var(--red)" stroke-width="18"
+                stroke-dasharray="57.1" stroke-dashoffset="-167.8" stroke-linecap="butt"/>
+              <text x="60" y="56" text-anchor="middle" fill="var(--text)" font-size="20" font-family="DM Mono" font-weight="700">4.2</text>
+              <text x="60" y="70" text-anchor="middle" fill="var(--text-muted)" font-size="9" font-family="DM Sans">promedio</text>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Positivo — 68%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Neutral — 13%</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Negativo — 19%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evolución mensual -->
+        <div class="chart-card full">
+          <div class="chart-title">Reseñas por mes</div>
+          <div class="sparkline-wrap">
+            <div class="sparkline-months">
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:40%"></div></div><div class="spark-month">Jul</div><div class="spark-val">8</div></div>
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:55%"></div></div><div class="spark-month">Ago</div><div class="spark-val">11</div></div>
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:35%"></div></div><div class="spark-month">Sep</div><div class="spark-val">7</div></div>
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:65%"></div></div><div class="spark-month">Oct</div><div class="spark-val">13</div></div>
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:80%"></div></div><div class="spark-month">Nov</div><div class="spark-val">16</div></div>
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:100%"></div></div><div class="spark-month">Dic</div><div class="spark-val">20</div></div>
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:70%"></div></div><div class="spark-month">Ene</div><div class="spark-val">14</div></div>
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:60%"></div></div><div class="spark-month">Feb</div><div class="spark-val">12</div></div>
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:75%"></div></div><div class="spark-month">Mar</div><div class="spark-val">15</div></div>
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:85%"></div></div><div class="spark-month">Abr</div><div class="spark-val">17</div></div>
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:90%"></div></div><div class="spark-month">May</div><div class="spark-val">18</div></div>
+              <div class="spark-col"><div class="spark-bar-wrap"><div class="spark-bar" style="height:95%;opacity:1;background:var(--accent)"></div></div><div class="spark-month" style="color:var(--accent)">Jun</div><div class="spark-val">19</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIMULADOR DE PUNTAJE -->
+        <div class="chart-card full" id="sim-card">
+          <div class="chart-title">Simulador de puntaje — ¿Cuántas reseñas necesito?</div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Puntaje actual</div>
+              <input type="number" id="sim-avg" value="4.2" min="1" max="5" step="0.1"
+                style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--accent);font-family:'DM Mono';font-size:22px;font-weight:700;padding:10px 14px;border-radius:6px;outline:none;"
+                oninput="simCalc()">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Total de reseñas actuales</div>
+              <input type="number" id="sim-total" value="347" min="1"
+                style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'DM Mono';font-size:22px;font-weight:700;padding:10px 14px;border-radius:6px;outline:none;"
+                oninput="simCalc()">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Quiero llegar a</div>
+              <input type="number" id="sim-target" value="4.3" min="1" max="5" step="0.1"
+                style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--green);font-family:'DM Mono';font-size:22px;font-weight:700;padding:10px 14px;border-radius:6px;outline:none;"
+                oninput="simCalc()">
+            </div>
+          </div>
+
+          <!-- Resultado principal -->
+          <div id="sim-result-main" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:18px 22px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <div>
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Reseñas de 5★ necesarias</div>
+                <div id="sim-need" style="font-family:'DM Mono';font-size:36px;font-weight:700;color:var(--accent)">—</div>
+              </div>
+              <div style="flex:1;min-width:200px;">
+                <div id="sim-formula" style="font-size:12px;color:var(--text-dim);font-family:'DM Mono';line-height:1.8;"></div>
+              </div>
+              <div id="sim-progress-wrap" style="flex:1;min-width:160px;">
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Progreso hacia la meta</div>
+                <div style="background:var(--border);border-radius:4px;height:12px;overflow:hidden;">
+                  <div id="sim-progress-bar" style="height:100%;border-radius:4px;background:var(--accent);transition:width .4s;width:0%"></div>
+                </div>
+                <div id="sim-progress-label" style="font-size:11px;color:var(--text-muted);margin-top:4px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Escenarios de impacto negativo -->
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">
+            ¿Qué pasa si en el camino recibo reseñas bajas?
+          </div>
+
+          <div id="sim-scenarios" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;"></div>
+
+          <div id="sim-warning" style="display:none;margin-top:14px;background:var(--red-dim);border:1px solid rgba(248,113,113,0.2);border-radius:6px;padding:12px 16px;font-size:12px;color:var(--red);line-height:1.6;"></div>
+        </div>
+
+        <!-- Temas frecuentes -->
+        <div class="chart-card">
+          <div class="chart-title">Temas más mencionados</div>
+          <div class="bar-row"><div class="bar-label" style="width:80px;text-align:left;font-size:12px;color:var(--text-muted)">Atención</div><div class="bar-track"><div class="bar-fill" style="width:72%;background:var(--accent)">72</div></div></div>
+          <div class="bar-row"><div class="bar-label" style="width:80px;text-align:left;font-size:12px;color:var(--text-muted)">Demoras</div><div class="bar-track"><div class="bar-fill" style="width:45%;background:var(--red)">45</div></div></div>
+          <div class="bar-row"><div class="bar-label" style="width:80px;text-align:left;font-size:12px;color:var(--text-muted)">Ambiente</div><div class="bar-track"><div class="bar-fill" style="width:61%;background:var(--green)">61</div></div></div>
+          <div class="bar-row"><div class="bar-label" style="width:80px;text-align:left;font-size:12px;color:var(--text-muted)">Tragos</div><div class="bar-track"><div class="bar-fill" style="width:58%;background:var(--green)">58</div></div></div>
+          <div class="bar-row"><div class="bar-label" style="width:80px;text-align:left;font-size:12px;color:var(--text-muted)">Precios</div><div class="bar-track"><div class="bar-fill" style="width:33%;background:var(--accent)">33</div></div></div>
+          <div class="bar-row"><div class="bar-label" style="width:80px;text-align:left;font-size:12px;color:var(--text-muted)">Música</div><div class="bar-track"><div class="bar-fill" style="width:27%;background:var(--accent)">27</div></div></div>
+        </div>
+
+        <!-- Horarios de reseñas -->
+        <div class="chart-card">
+          <div class="chart-title">Cuándo dejan reseñas</div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;">
+            <div style="text-align:center;font-size:10px;color:var(--text-dim)">L</div>
+            <div style="text-align:center;font-size:10px;color:var(--text-dim)">M</div>
+            <div style="text-align:center;font-size:10px;color:var(--text-dim)">X</div>
+            <div style="text-align:center;font-size:10px;color:var(--text-dim)">J</div>
+            <div style="text-align:center;font-size:10px;color:var(--text-dim)">V</div>
+            <div style="text-align:center;font-size:10px;color:var(--accent)">S</div>
+            <div style="text-align:center;font-size:10px;color:var(--accent)">D</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px;">
+            <div id="hm1" style="height:60px;background:rgba(232,197,71,0.15);border-radius:4px;cursor:pointer" title="Lunes: 18 reseñas"></div>
+            <div style="height:60px;background:rgba(232,197,71,0.2);border-radius:4px;" title="Martes: 24 reseñas"></div>
+            <div style="height:60px;background:rgba(232,197,71,0.18);border-radius:4px;" title="Miércoles: 21 reseñas"></div>
+            <div style="height:60px;background:rgba(232,197,71,0.25);border-radius:4px;" title="Jueves: 30 reseñas"></div>
+            <div style="height:60px;background:rgba(232,197,71,0.6);border-radius:4px;" title="Viernes: 72 reseñas"></div>
+            <div style="height:60px;background:rgba(232,197,71,0.9);border-radius:4px;" title="Sábado: 108 reseñas"></div>
+            <div style="height:60px;background:rgba(232,197,71,0.5);border-radius:4px;" title="Domingo: 60 reseñas"></div>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-dim)">El sábado concentra la mayor actividad</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========== EMPLEADOS ========== -->
+    <div class="section" id="sec-empleados">
+      <div class="section-title">Ranking de empleados</div>
+      <div class="section-sub">Mencionados en reseñas de Google, con valoración por estrellas</div>
+
+      <div class="period-badge" id="emp-period-badge">
+        📅 Basado en las últimas 5 reseñas disponibles
+      </div>
+
+      <div class="emp-filters">
+        <select class="filter-select" onchange="sortEmployees(this.value)">
+          <option value="score">Ordenar por score</option>
+          <option value="menciones">Ordenar por menciones</option>
+          <option value="cinco">Ordenar por 5 estrellas</option>
+        </select>
+      </div>
+
+      <div class="emp-grid" id="emp-grid">
+        <div style="text-align:center;padding:48px 20px;color:var(--text-muted);grid-column:1/-1;">
+          <div style="font-size:32px;margin-bottom:12px;">◈</div>
+          <div style="font-size:15px;margin-bottom:6px;">Sincronizá las reseñas para ver el ranking</div>
+          <div style="font-size:12px;color:var(--text-dim);">Los empleados se calculan automáticamente desde las reseñas cargadas</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- BOTTOM NAV — mobile -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-item active" onclick="showSection('resenas', this)">
+    <span class="nav-icon">★</span>
+    <span>Reseñas</span>
+    <span class="bottom-nav-badge" id="bottom-badge">8</span>
+  </div>
+  <div class="bottom-nav-item" onclick="showSection('analytics', this)">
+    <span class="nav-icon">◎</span>
+    <span>Analíticas</span>
+  </div>
+  <div class="bottom-nav-item" onclick="showSection('empleados', this)">
+    <span class="nav-icon">◈</span>
+    <span>Empleados</span>
+  </div>
+</nav>
+
+<!-- MODAL PUBLICAR -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">¿Publicar en Google?</div>
+    <div class="modal-sub">Esta respuesta se publicará en tu perfil de Google Business y será visible para todos.</div>
+    <div class="response-existing" id="modal-preview" style="font-size:13px;line-height:1.6;color:#ccc;background:var(--surface2);border-radius:6px;padding:12px 14px;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-publish" onclick="confirmPublish()">Confirmar publicación</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ <span id="toast-msg"></span></div>
+
+<script>
+  // Fallbacks offline — variados, sin signos de apertura, sin frases hechas
+  // Se llaman con author como parámetro para personalizar donde aplica
+  function getOfflineResponse(sentiment, author) {
+    const name = author && author !== 'el cliente' ? `, ${author}` : '';
+    const pools = {
+      neg: [
+        `Lo que describís${name} no es lo que queremos que vivan acá y lo tomamos muy en serio. Vamos a trabajar en eso. Si nos das otra oportunidad, va a ser distinto.\n\nEl equipo del Bar Ideal.`,
+        `Leímos tu reseña con atención y entendemos la frustración. No estuvo bien y no vamos a buscarle excusas. Si volvés${name}, vamos a asegurarnos de que sea otra historia.\n\nEl equipo del Bar Ideal.`,
+        `Tu comentario nos llegó y es exactamente la señal de que hay cosas para mejorar. Gracias por decirlo${name}. Te esperamos para revertir la experiencia.\n\nEl equipo del Bar Ideal.`
+      ],
+      pos: [
+        `Qué bueno leer esto${name}. Que hayas elegido el Bar Ideal para ese momento y que haya estado a la altura es justo lo que buscamos. Hasta la próxima.\n\nEl equipo del Bar Ideal.`,
+        `Se nota que lo pasaste bien y eso nos pone contentos de verdad. Los esperamos cuando quieran volver${name}.\n\nEl equipo del Bar Ideal.`,
+        `Arrancar el día leyendo esto tiene otro sabor. Gracias por escribirlo${name}.\n\nEl equipo del Bar Ideal.`
+      ],
+      neu: [
+        `La devolución honesta siempre ayuda más que el silencio${name}. Lo bueno nos da energía y lo mejorable lo anotamos. Te esperamos pronto.\n\nEl equipo del Bar Ideal.`,
+        `Hay cosas que podemos mejorar, lo sabemos, y comentarios como el tuyo ayudan a no perderlo de vista. Esperamos verte de nuevo${name}.\n\nEl equipo del Bar Ideal.`,
+        `Nos quedamos con los dos lados de la reseña. Seguimos trabajando en lo que falta. Hasta pronto${name}.\n\nEl equipo del Bar Ideal.`
+      ]
+    };
+    const pool = pools[sentiment] || pools.pos;
+    const unused = pool.filter(r => !responseHistory.includes(r.trim()));
+    const options = unused.length > 0 ? unused : pool;
+    return options[Math.floor(Math.random() * options.length)];
+  }
+
+  // Memoria de respuestas ya generadas — para no repetirse
+  // Guarda las últimas 20 respuestas publicadas o generadas
+  const responseHistory = [];
+  const MAX_HISTORY = 20;
+
+  function addToHistory(text) {
+    responseHistory.unshift(text.trim());
+    if (responseHistory.length > MAX_HISTORY) responseHistory.pop();
+  }
+
+  function buildHistoryBlock() {
+    if (responseHistory.length === 0) return '';
+    return `\nRESPUESTAS YA USADAS (no repitas estructura, apertura ni frases de estas):\n${
+      responseHistory.map((r, i) => `${i + 1}. "${r}"`).join('\n')
+    }`;
+  }
+
+  let pendingPublish = null;
+
+  function showSection(name, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('sec-' + name).classList.add('active');
+    // Mark active in both navs
+    document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(n => {
+      if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + name + "'")) {
+        n.classList.add('active');
+      }
+    });
+  }
+
+  async function generateAI(textareaId, genId, sentiment) {
+    const textarea = document.getElementById(textareaId);
+    const gen      = document.getElementById(genId);
+
+    // Buscar el card padre para leer el contexto real de la reseña
+    const card     = textarea.closest('.review-card');
+    const author   = card?.dataset.author   || 'el cliente';
+    const stars    = card?.dataset.stars    || '?';
+    const text     = card?.dataset.text     || '';
+    const employees = card?.dataset.employees || '';
+
+    textarea.value = '';
+    textarea.disabled = true;
+    gen.classList.add('show');
+
+    // Construir el prompt con todo el contexto del bar y la reseña
+    const employeeLine = employees
+      ? `En la reseña se menciona al empleado/a: ${employees}. Si la mención es positiva, destacá su nombre. Si es negativa, no lo nombres pero sí pedí disculpas por la experiencia.`
+      : '';
+
+    const sentimentMap = { pos: 'positiva', neg: 'negativa', neu: 'neutral o mixta' };
+    const sentimentLabel = sentimentMap[sentiment] || 'neutral';
+
+    const prompt = `Sos el encargado del Bar Ideal, un bar de Tandil, Argentina. Tenés que responder una reseña de Google.
+
+RESEÑA:
+- Autor: ${author}
+- Estrellas: ${stars}/5
+- Tipo: ${sentimentLabel}
+- Texto: "${text}"
+
+${employeeLine}
+
+REGLAS DE ESCRITURA (todas obligatorias):
+- Máximo 4 oraciones cortas. Sin emojis.
+- Escribí como una persona real, no como un community manager corporativo.
+- NUNCA empieces con signo de exclamación (¡) ni de interrogación (¿).
+- NUNCA uses estas frases ni nada parecido: "lamentamos los inconvenientes", "nos alegra que hayas disfrutado", "gracias por tu comentario", "tomamos nota", "en el Bar Ideal nos esforzamos", "es un placer", "ante todo", "en primer lugar", "estimado/a".
+- No arranques con "Hola" seguido de coma.
+- NO repitas ni parafrasees el texto de la reseña. Si el cliente dice "el ambiente estaba bueno", no respondas "nos alegra que el ambiente te haya gustado". Respondé desde tu lugar, no reflejando lo que dijo.
+- Respondé al espíritu de la reseña, no a las palabras exactas.
+- Variá la estructura: no siempre empieces agradeciendo, no siempre termines igual.
+- Tono: cercano, honesto, sin exagerar la emoción.
+- Firmá siempre al final, en línea aparte: El equipo del Bar Ideal.
+- Respondé SOLO con el texto. Sin comillas, sin aclaraciones, sin nada más.
+${buildHistoryBlock()}`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          stream: true,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      if (!response.ok) throw new Error(`API error ${response.status}`);
+
+      gen.classList.remove('show');
+      textarea.disabled = false;
+
+      // Stream SSE — leer chunk a chunk y escribir en el textarea en tiempo real
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(data);
+            const delta = parsed?.delta?.text || parsed?.content_block?.text || '';
+            if (delta) textarea.value += delta;
+          } catch { /* ignorar líneas no-JSON */ }
+        }
+      }
+
+      // Guardar en historial para no repetir en la próxima generación
+      if (textarea.value.trim()) addToHistory(textarea.value);
+
+    } catch (err) {
+      gen.classList.remove('show');
+      textarea.disabled = false;
+      // Fallback offline: respuesta variada con nombre del cliente
+      const fallback = getOfflineResponse(sentiment, author);
+      let i = 0;
+      const interval = setInterval(() => {
+        textarea.value = fallback.slice(0, i);
+        i += 4;
+        if (i > fallback.length) {
+          textarea.value = fallback;
+          addToHistory(fallback);
+          clearInterval(interval);
+        }
+      }, 16);
+      showToast('Modo offline — usando respuesta de ejemplo', 2500, true);
+    }
+  }
+
+  function publishResponse(cardId) {
+    const card = document.getElementById(cardId);
+    const textarea = card.querySelector('.response-textarea');
+    if (!textarea || !textarea.value.trim()) {
+      showToast('Primero generá o escribí una respuesta', 2000, true);
+      return;
+    }
+    pendingPublish = { cardId, text: textarea.value };
+    document.getElementById('modal-preview').textContent = textarea.value;
+    document.getElementById('modal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('show');
+    pendingPublish = null;
+  }
+
+  function confirmPublish() {
+    if (!pendingPublish) return;
+    const card = document.getElementById(pendingPublish.cardId);
+    card.classList.remove('pending');
+    card.classList.add('responded');
+    const area = card.querySelector('.response-area');
+    const text = pendingPublish.text;
+    area.innerHTML = `
+      <div class="response-label">Respuesta publicada</div>
+      <div class="response-existing">${text}</div>
+      <div class="response-actions">
+        <button class="btn btn-ghost" onclick="editResponse('${pendingPublish.cardId}')">Editar respuesta</button>
+      </div>
+    `;
+    const meta = card.querySelector('.review-meta span:last-child');
+    if (meta) { meta.style.color = 'var(--green)'; meta.textContent = '✓ Respondida'; }
+    closeModal();
+    showToast('Respuesta publicada en Google Business', 3000);
+    addToHistory(text);
+    // update badge
+    const badge = document.querySelector('.nav-badge');
+    if (badge) { const n = parseInt(badge.textContent) - 1; badge.textContent = n; if (n===0) badge.style.display='none'; }
+  }
+
+  function editResponse(cardId) {
+    const card = document.getElementById(cardId);
+    const existing = card.querySelector('.response-existing');
+    if (!existing) return;
+    const text = existing.textContent;
+    const area = card.querySelector('.response-area');
+    area.innerHTML = `
+      <div class="response-label">Tu respuesta</div>
+      <textarea class="response-textarea" id="resp_${cardId}">${text}</textarea>
+      <div class="response-actions">
+        <button class="btn btn-publish" onclick="publishResponse('${cardId}')">Actualizar en Google</button>
+        <button class="btn btn-ghost" onclick="location.reload()">Cancelar</button>
+      </div>
+    `;
+  }
+
+  function showToast(msg, duration, isError) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.style.background = isError ? 'var(--red)' : 'var(--green)';
+    t.style.color = isError ? '#fff' : '#000';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), duration || 3000);
+  }
+
+  // ── CONFIGURACIÓN ────────────────────────────────────────────────────────
+  const PLACES_API_KEY = 'AIzaSyBGaxcMeMeaGRdrZNB8ZAXaUigFRWEny3c';
+  const PLACE_ID       = 'ChIJ6bz7XwAfkZURzlHBFZCwS4g';
+
+  // Lista de empleados con variantes y diminutivos
+  // Cada entrada: { id, nombres: [variantes], display: 'nombre para mostrar' }
+  const EMPLOYEES = [
+    { id: 'lucia_c', nombres: ['lucia c', 'luci c', 'lu c', 'lucia ca', 'lucia co', 'lucia cu', 'lucia cl'], display: 'Lucía C.' },
+    { id: 'lucia_l', nombres: ['lucia l', 'luci l', 'lu l', 'lucia la', 'lucia le', 'lucia li', 'lucia lo'], display: 'Lucía L.' },
+    { id: 'sofia_l', nombres: ['sofia l', 'sofi l', 'sofy l', 'sofía l', 'sofia la', 'sofia le', 'sofia li', 'sofia lo'], display: 'Sofía L.' },
+    { id: 'sofia_i', nombres: ['sofia i', 'sofi i', 'sofy i', 'sofía i', 'sofia ia', 'sofia im', 'sofia ir'], display: 'Sofía I.' },
+    { id: 'ludmila', nombres: ['ludmila', 'ludmi', 'lud', 'mila'], display: 'Ludmila' },
+    { id: 'kevin',   nombres: ['kevin', 'kev'], display: 'Kevin' },
+    { id: 'yamila',  nombres: ['yamila', 'yami', 'yamy'], display: 'Yamila' },
+    { id: 'romina',  nombres: ['romina', 'romi', 'romy'], display: 'Romina' },
+    { id: 'nicolas', nombres: ['nicolas', 'nicolás', 'nico', 'nicol'], display: 'Nicolás' },
+    { id: 'benjamin',nombres: ['benjamin', 'benjamín', 'benja', 'benju', 'benji', 'ben'], display: 'Benjamín' },
+  ];
+
+  // Detecta empleados mencionados en el texto de una reseña
+  function detectEmployees(text) {
+    const lower = text.toLowerCase();
+    const found = [];
+    for (const emp of EMPLOYEES) {
+      for (const variant of emp.nombres) {
+        // Buscar la variante como palabra completa o seguida de inicial de apellido
+        const re = new RegExp(`\\b${variant}\\b`, 'i');
+        if (re.test(lower)) {
+          found.push(emp);
+          break; // ya encontramos a este empleado, pasamos al siguiente
+        }
+      }
+    }
+    return found;
+  }
+  async function loadReviews() {
+    const syncLabel = document.getElementById('sync-label');
+    const syncDot   = document.getElementById('sync-dot');
+    syncLabel.textContent = 'Cargando…';
+    syncDot.style.background = 'var(--accent)';
+
+    try {
+      // Usamos Claude con web_search para traer las reseñas reales de Google Maps
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 4000,
+          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+          messages: [{
+            role: 'user',
+            content: `Buscá las reseñas más recientes del Bar Ideal ubicado en Rodríguez 499, Tandil, Argentina en Google Maps.
+            
+Devolvé ÚNICAMENTE un JSON válido con esta estructura exacta, sin texto adicional, sin markdown, sin explicaciones:
+{
+  "rating": 4.6,
+  "userRatingCount": 1456,
+  "reviews": [
+    {
+      "author_name": "Nombre del autor",
+      "rating": 5,
+      "text": "Texto de la reseña",
+      "time": 1718000000,
+      "relative_time_description": "Hace X días"
+    }
+  ]
+}
+
+Buscá al menos 5 reseñas recientes. El campo "time" debe ser un timestamp Unix. Si no encontrás el dato exacto usá una estimación razonable.`
+          }]
+        })
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+
+      // Extraer el texto de la respuesta
+      const textBlock = result.content?.find(b => b.type === 'text');
+      if (!textBlock) throw new Error('Sin respuesta de Claude');
+
+      // Limpiar y parsear JSON
+      let jsonText = textBlock.text.trim();
+      jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      const data = JSON.parse(jsonText);
+
+      const reviews = (data.reviews || []).sort((a, b) => (b.time || 0) - (a.time || 0));
+      const rating  = data.rating || 0;
+      const total   = data.userRatingCount || 0;
+
+      // Actualizar métricas
+      document.getElementById('met-avg').innerHTML   = `${rating.toFixed(1)} <span style="font-size:18px">★</span>`;
+      document.getElementById('met-total').textContent = total;
+      document.getElementById('met-sync').textContent  = new Date().toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
+
+      // Renderizar cards
+      renderReviews(reviews);
+
+      // Calcular ranking de empleados desde las mismas reseñas
+      buildEmployeeData(reviews);
+
+      syncLabel.textContent = 'Sincronizar';
+      syncDot.style.background = 'var(--green)';
+      showToast(`${reviews.length} reseñas cargadas desde Google`, 3000);
+
+    } catch (err) {
+      syncLabel.textContent = 'Sincronizar';
+      syncDot.style.background = 'var(--red)';
+      showToast(`Error al conectar con Google: ${err.message}`, 4000, true);
+      console.error(err);
+    }
+  }
+
+  function detectSentiment(stars) {
+    if (stars >= 4) return 'pos';
+    if (stars === 3) return 'neu';
+    return 'neg';
+  }
+
+  function starsHTML(n) {
+    const full  = '★'.repeat(n);
+    const empty = '★'.repeat(5 - n);
+    return `<span class="stars">${full}</span><span style="color:var(--text-dim)">${empty}</span>`;
+  }
+
+  function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const d = Math.floor(diff / 86400000);
+    if (d === 0) return 'Hoy';
+    if (d === 1) return 'Hace 1 día';
+    if (d < 30)  return `Hace ${d} días`;
+    if (d < 365) return `Hace ${Math.floor(d/30)} meses`;
+    return `Hace ${Math.floor(d/365)} años`;
+  }
+
+  function highlightEmployees(text, employees) {
+    // employees es array de objetos {id, nombres, display}
+    let result = text;
+    employees.forEach(emp => {
+      emp.nombres.forEach(variant => {
+        const re = new RegExp(`(${variant})`, 'gi');
+        result = result.replace(re, `<strong style="color:var(--accent)">$1</strong>`);
+      });
+    });
+    return result;
+  }
+
+  let pendingCount = 0;
+
+  function renderReviews(reviews) {
+    const list  = document.getElementById('reviews-list');
+    const empty = document.getElementById('reviews-empty');
+    empty.style.display = 'none';
+    // Limpiar cards anteriores (mantener el empty div)
+    list.querySelectorAll('.review-card').forEach(c => c.remove());
+
+    pendingCount = 0;
+
+    reviews.forEach((r, i) => {
+      const stars     = r.rating || 0;
+      const author    = r.author_name || 'Cliente';
+      const text      = r.text || '';
+      const date      = r.time ? new Date(r.time * 1000).toISOString() : '';
+      const sentiment = detectSentiment(stars);
+      const employees = detectEmployees(text); // array de objetos {id, nombres, display}
+      const hasReply  = false; // Places API (New) no devuelve si hay respuesta del dueño — disponible con My Business API
+      const cardId    = `rc_${i}`;
+      const respId    = `resp_${i}`;
+      const genId     = `gen_${i}`;
+      const isPending = !hasReply;
+
+      if (isPending) pendingCount++;
+
+      const sentimentLabel = { pos:'Positiva', neg:'Negativa', neu:'Neutral' }[sentiment];
+      const sentimentColor = { pos:'var(--green)', neg:'var(--red)', neu:'var(--accent)' }[sentiment];
+
+      const empTags = employees.map(e =>
+        `<span class="tag emp">👤 ${e.display}</span>`
+      ).join('');
+
+      const employeeNames = employees.map(e => e.display).join(', ');
+
+      const responseArea = isPending ? `
+        <div class="response-area">
+          <div class="response-label">Tu respuesta</div>
+          <textarea class="response-textarea" id="${respId}" placeholder="Escribí tu respuesta o generá una con IA…"></textarea>
+          <div class="ai-generating" id="${genId}">
+            <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+            Generando respuesta con IA…
+          </div>
+          <div class="response-actions">
+            <button class="btn btn-ai" onclick="generateAI('${respId}','${genId}','${sentiment}')">✦ Generar con IA</button>
+            <button class="btn btn-publish" onclick="publishResponse('${cardId}')">Publicar en Google</button>
+            <button class="btn btn-ghost">Ignorar</button>
+          </div>
+        </div>` : `
+        <div class="response-area">
+          <div class="response-label">Respuesta publicada</div>
+          <div class="response-existing">${r.ownerResponse?.text || 'Ya respondida en Google.'}</div>
+          <div class="response-actions">
+            <button class="btn btn-ghost" onclick="editResponse('${cardId}')">Editar respuesta</button>
+          </div>
+        </div>`;
+
+      const card = document.createElement('div');
+      card.className = `review-card pending`;
+      card.id = cardId;
+      card.dataset.stars     = stars;
+      card.dataset.author    = author;
+      card.dataset.text      = text;
+      card.dataset.employees = employeeNames;
+      card.dataset.sentiment = sentiment;
+
+      card.innerHTML = `
+        <div class="review-card-head">
+          <div class="reviewer">
+            <div class="avatar">${author.charAt(0).toUpperCase()}</div>
+            <div>
+              <div class="reviewer-name">${author}</div>
+              <div class="reviewer-date">${timeAgo(date)} · ${starsHTML(stars)}</div>
+            </div>
+          </div>
+          <div class="review-meta">
+            <span class="sentiment-badge ${sentiment}">${sentimentLabel}</span>
+            <span style="font-size:11px;color:var(--text-muted)">
+              ● Gestioná tu respuesta
+            </span>
+          </div>
+        </div>
+        <div class="review-text">${text ? highlightEmployees(text, employees) : '<em style="color:var(--text-dim)">Sin texto</em>'}</div>
+        ${empTags ? `<div class="review-tags">${empTags}</div>` : ''}
+        ${responseArea}
+      `;
+
+      list.appendChild(card);
+    });
+
+    // Actualizar badge de pendientes
+    const badge = document.querySelector('.nav-badge');
+    const bottomBadge = document.getElementById('bottom-badge');
+    if (badge) {
+      badge.textContent = pendingCount;
+      badge.style.display = pendingCount > 0 ? '' : 'none';
+    }
+    if (bottomBadge) {
+      bottomBadge.textContent = pendingCount;
+      bottomBadge.style.display = pendingCount > 0 ? '' : 'none';
+    }
+    document.getElementById('met-pending').textContent = pendingCount;
+  }
+
+  function filterReviews() {
+    const val = document.querySelector('.filter-select').value;
+    document.querySelectorAll('.review-card').forEach(card => {
+      const stars = parseInt(card.dataset.stars);
+      card.style.display = (val === 'all' || stars === parseInt(val)) ? '' : 'none';
+    });
+  }
+
+  // ── RANKING DE EMPLEADOS ─────────────────────────────────────────────────
+  let empData = {}; // { empId: { display, stars: {1:0,2:0,3:0,4:0,5:0} } }
+
+  function buildEmployeeData(reviews) {
+    empData = {};
+    reviews.forEach(r => {
+      const text  = r.text || '';
+      const stars = r.rating || 0;
+      const found = detectEmployees(text);
+      found.forEach(emp => {
+        if (!empData[emp.id]) {
+          empData[emp.id] = { display: emp.display, stars: {1:0,2:0,3:0,4:0,5:0} };
+        }
+        empData[emp.id].stars[stars] = (empData[emp.id].stars[stars] || 0) + 1;
+      });
+    });
+    renderEmployees('score');
+  }
+
+  function calcScore(stars) {
+    const total = Object.values(stars).reduce((a, b) => a + b, 0);
+    if (total === 0) return 0;
+    const sum = Object.entries(stars).reduce((a, [k, v]) => a + parseInt(k) * v, 0);
+    return sum / total;
+  }
+
+  function sortEmployees(criterion) {
+    renderEmployees(criterion);
+  }
+
+  function renderEmployees(criterion = 'score') {
+    const grid = document.getElementById('emp-grid');
+    const entries = Object.entries(empData);
+
+    if (entries.length === 0) {
+      grid.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--text-muted);grid-column:1/-1;">
+        <div style="font-size:32px;margin-bottom:12px;">◈</div>
+        <div style="font-size:15px;margin-bottom:6px;">Ningún empleado mencionado en estas reseñas</div>
+        <div style="font-size:12px;color:var(--text-dim);">Las últimas 5 reseñas de Google no mencionan empleados por nombre</div>
+      </div>`;
+      return;
+    }
+
+    // Ordenar según criterio
+    entries.sort((a, b) => {
+      const [, da] = a; const [, db] = b;
+      if (criterion === 'menciones') {
+        const ta = Object.values(da.stars).reduce((s,v) => s+v, 0);
+        const tb = Object.values(db.stars).reduce((s,v) => s+v, 0);
+        return tb - ta;
+      }
+      if (criterion === 'cinco') return (db.stars[5]||0) - (da.stars[5]||0);
+      return calcScore(db.stars) - calcScore(da.stars); // score
+    });
+
+    const starColors = { 5:'var(--green)', 4:'#86efac', 3:'var(--accent)', 2:'var(--orange)', 1:'var(--red)' };
+
+    grid.innerHTML = entries.map(([id, emp], idx) => {
+      const total  = Object.values(emp.stars).reduce((s, v) => s + v, 0);
+      const score  = calcScore(emp.stars);
+      const maxVal = Math.max(...Object.values(emp.stars), 1);
+
+      const starRows = [5,4,3,2,1].map(n => {
+        const count = emp.stars[n] || 0;
+        const pct   = Math.round((count / maxVal) * 100);
+        return `<div class="emp-star-row">
+          <div class="emp-star-num">${n}</div>
+          <div class="emp-star-icon">★</div>
+          <div class="emp-star-bar-track">
+            <div class="emp-star-bar-fill" style="width:${pct}%;background:${starColors[n]};height:100%;border-radius:3px"></div>
+          </div>
+          <div class="emp-star-count">${count}</div>
+        </div>`;
+      }).join('');
+
+      return `<div class="emp-card">
+        <div class="emp-head">
+          <div class="emp-avatar">${emp.display.charAt(0)}</div>
+          <div>
+            <div class="emp-name">${emp.display}</div>
+            <div class="emp-mentions">${total} mención${total !== 1 ? 'es' : ''} en estas reseñas</div>
+          </div>
+          <div class="emp-rank">#${idx + 1}</div>
+        </div>
+        <div class="emp-stars-breakdown">${starRows}</div>
+        <div class="emp-score">
+          <div class="emp-score-label">Score promedio</div>
+          <div class="emp-score-val">${score.toFixed(1)} ★</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Cargar automáticamente al iniciar
+  document.addEventListener('DOMContentLoaded', loadReviews);
+
+
+  function simCalc() {
+    const avg    = parseFloat(document.getElementById('sim-avg').value)    || 4.2;
+    const total  = parseInt(document.getElementById('sim-total').value)    || 347;
+    const target = parseFloat(document.getElementById('sim-target').value) || 4.3;
+
+    // Suma total acumulada (reconstruida desde promedio)
+    const sumActual = avg * total;
+
+    // Cuántas reseñas de 5★ necesito para superar el umbral:
+    // (sumActual + 5*n) / (total + n) >= target
+    // → n >= (target*total - sumActual) / (5 - target)
+    let need = 0;
+    if (target > avg && target < 5) {
+      const raw = (target * total - sumActual) / (5 - target);
+      need = Math.ceil(raw);
+      // verify (puede haber rounding edge)
+      while (((sumActual + 5 * need) / (total + need)) < target - 0.00001) need++;
+    } else if (target <= avg) {
+      need = 0;
+    }
+
+    const newAvg    = need > 0 ? ((sumActual + 5 * need) / (total + need)) : avg;
+    const newTotal  = total + need;
+
+    // Mostrar resultado principal
+    document.getElementById('sim-need').textContent = need === 0 ? '¡Ya lo tenés!' : need;
+    document.getElementById('sim-formula').innerHTML =
+      `Suma actual: ${avg} × ${total} = <b style="color:var(--text)">${sumActual.toFixed(1)}</b><br>` +
+      (need > 0
+        ? `Con ${need} reseñas de 5★: (${sumActual.toFixed(1)} + ${(5*need).toFixed(0)}) ÷ ${newTotal} = <b style="color:var(--green)">${newAvg.toFixed(2)}</b>`
+        : `El puntaje objetivo ya fue alcanzado.`);
+
+    // Barra de progreso (distancia recorrida vs total necesaria)
+    const distTotal = target - avg;
+    const distNeeded = need > 0 ? Math.max(0, target - avg) : distTotal;
+    const pct = distTotal > 0 ? Math.min(100, Math.round(((distTotal - distNeeded) / distTotal) * 100)) : 100;
+    document.getElementById('sim-progress-bar').style.width = pct + '%';
+    document.getElementById('sim-progress-label').textContent =
+      need === 0 ? 'Meta alcanzada ✓' : `Necesitás ${need} reseñas más para cruzar ${target}`;
+
+    // ── Escenarios: ¿qué pasa si en el camino llegan k reseñas bajas? ──
+    const scenarioStars = [1, 2, 3, 4];
+    const container = document.getElementById('sim-scenarios');
+    container.innerHTML = '';
+
+    let hasWarning = false;
+    let worstWarning = '';
+
+    scenarioStars.forEach(badStar => {
+      // Para cada estrella baja posible, calculamos cuántas de 5★ extra
+      // necesito para compensar ESA reseña mala Y aun así llegar al target
+      // Nuevo estado después de recibir 1 reseña de badStar:
+      const sumAfterBad   = sumActual + badStar;
+      const totalAfterBad = total + 1;
+      const avgAfterBad   = sumAfterBad / totalAfterBad;
+
+      let needAfterBad = 0;
+      if (target > avgAfterBad) {
+        const raw2 = (target * totalAfterBad - sumAfterBad) / (5 - target);
+        needAfterBad = Math.ceil(raw2);
+        while (((sumAfterBad + 5 * needAfterBad) / (totalAfterBad + needAfterBad)) < target - 0.00001) needAfterBad++;
+      }
+
+      const extra     = Math.max(0, needAfterBad - need);
+      const color     = badStar >= 4 ? 'var(--green)' : badStar === 3 ? 'var(--accent)' : badStar === 2 ? 'var(--orange)' : 'var(--red)';
+      const bgColor   = badStar >= 4 ? 'var(--green-dim)' : badStar === 3 ? 'var(--accent-dim)' : 'var(--red-dim)';
+      const borderCol = badStar >= 4 ? 'rgba(74,222,128,.2)' : badStar === 3 ? 'rgba(232,197,71,.2)' : 'rgba(248,113,113,.2)';
+
+      if (extra > 0 && badStar <= 2) {
+        hasWarning = true;
+        worstWarning = `Una reseña de ${badStar}★ te empuja el nuevo promedio a ${avgAfterBad.toFixed(2)} y necesitás ${needAfterBad} reseñas de 5★ en total (${extra} extra) para recuperarte.`;
+      }
+
+      container.innerHTML += `
+        <div style="background:${bgColor};border:1px solid ${borderCol};border-radius:8px;padding:14px 16px;text-align:center;">
+          <div style="font-size:11px;color:${color};font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">
+            Si llega 1 reseña de ${badStar}★
+          </div>
+          <div style="font-size:22px;font-weight:700;font-family:'DM Mono';color:var(--text);">
+            ${needAfterBad === 0 ? '—' : needAfterBad}
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">reseñas de 5★ necesarias</div>
+          <div style="font-size:11px;margin-top:8px;color:${extra > 0 ? color : 'var(--text-dim)'}">
+            ${extra > 0 ? `+${extra} extra vs. sin la mala` : extra === 0 && needAfterBad === 0 ? 'No te afecta' : 'Sin impacto adicional'}
+          </div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">nuevo prom: ${avgAfterBad.toFixed(2)}</div>
+        </div>
+      `;
+    });
+
+    // Warning general
+    const warnEl = document.getElementById('sim-warning');
+    if (hasWarning) {
+      warnEl.style.display = 'block';
+      warnEl.innerHTML = `⚠ <strong>Cuidado:</strong> ${worstWarning}`;
+    } else {
+      warnEl.style.display = 'none';
+    }
+  }
+
+  // Calcular al cargar
+  document.addEventListener('DOMContentLoaded', simCalc);
+</script>
+</body>
+</html>
