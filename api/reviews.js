@@ -1,4 +1,4 @@
-const MAKE_API_TOKEN = 'dae50940-1697-4c3c-89c1-3c88c8ba3a59';
+const MAKE_API_TOKEN = 'c941991c-0e0a-4e15-80fe-8425868afe57';
 const MAKE_ZONE = 'us2.make.com';
 const DATASTORE_RESENAS = 111499;
 const DATASTORE_STATS = 111500;
@@ -17,8 +17,8 @@ export default async function handler(req, res) {
     };
 
     const [resenasRes, statsRes] = await Promise.all([
-      fetch(`https://${MAKE_ZONE}/api/v2/data-stores/${DATASTORE_RESENAS}/data?limit=50`, { headers }),
-      fetch(`https://${MAKE_ZONE}/api/v2/data-stores/${DATASTORE_STATS}/data?limit=1`, { headers })
+      fetch(`https://${MAKE_ZONE}/api/v2/data-stores/${DATASTORE_RESENAS}/data?pg[limit]=50`, { headers }),
+      fetch(`https://${MAKE_ZONE}/api/v2/data-stores/${DATASTORE_STATS}/data?pg[limit]=1`, { headers })
     ]);
 
     const resenasData = await resenasRes.json();
