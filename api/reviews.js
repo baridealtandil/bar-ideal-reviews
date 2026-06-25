@@ -1,20 +1,74 @@
-const PLACES_API_KEY = 'AIzaSyBGaxcMeMeaGRdrZNB8ZAXaUigFRWEny3c';
-const PLACE_ID = 'ChIJ6bz7XwAfkZURzlHBFZCwS4g';
+const MAKE_WEBHOOK_URL = 'https://hook.us2.make.com/cfgo4gbff4w5bo0iflnbc9tnadewn1a5';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   try {
-    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=rating,user_ratings_total,reviews&language=es&reviews_sort=newest&key=${PLACES_API_KEY}`;
-    const response = await fetch(url);
+    const response = await fetch(MAKE_WEBHOOK_URL);
     const data = await response.json();
-    if (data.status !== 'OK') throw new Error(data.status);
-    const reviews = (data.result.reviews || []).sort((a, b) => b.time - a.time);
+
+    // data.reviews => array de reseñas del data store bar_ideal_reseñas
+    // data.stats   => objeto con estadísticas del data store bar_ideal_stats
+
+    const reviews = (data.reviews || []).map(r => ({
+      author_name: r.reviewer,
+      rating: Number(r.rating),
+      text: r.comment || '',
+      time: r.createTime ? Math.floor(new Date(r.createTime).getTime() / 1000) : 0,
+      relative_time_description: r.createTime
+        ? formatRelativeTime(r.createTime)
+        : '',
+      hasReply: r.hasReply || false,
+      replyText: r.replyText || '',
+      reviewId: r.reviewId || ''
+    }));
+
+    const stats = data.stats || {};
+
     res.status(200).json({
-      rating: data.result.rating || 0,
-      userRatingCount: data.result.user_ratings_total || 0,
-      reviews
+      // Compatibilidad con el dashboard actual
+      rating: stats.promedioGeneral || 0,
+      userRatingCount: stats.totalHistorico || 0,
+      reviews,
+
+      // Datos nuevos para el dashboard mejorado
+      stats: {
+        totalMes: stats.totalMes || 0,
+        promedioMes: stats.promedioMes || 0,
+        promedioGeneral: stats.promedioGeneral || 0,
+        totalHistorico: stats.totalHistorico || 0,
+        sinResponder: stats.sinResponder || 0,
+        stars5: stats.stars5 || 0,
+        stars4: stats.stars4 || 0,
+        stars3: stats.stars3 || 0,
+        stars2: stats.stars2 || 0,
+        stars1: stats.stars1 || 0,
+        empleados: stats.empleados || '',
+        ultimaSync: stats.ultimaSync || null
+      }
     });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+}
+
+function formatRelativeTime(isoString) {
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'Hoy';
+  if (diffDays === 1) return 'Ayer';
+  if (diffDays < 7) return `Hace ${diffDays} días`;
+  if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
+  if (diffDays < 365) return `Hace ${Math.floor(diffDays / 30)} meses`;
+  return `Hace ${Math.floor(diffDays / 365)} años`;
 }
