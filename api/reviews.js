@@ -1,4 +1,4 @@
-const MAKE_WEBHOOK_URL = 'https://hook.us2.make.com/cfgo4gbff4w5bo0iflnbc9tnadewn1a5';
+const MAKE_WEBHOOK_URL = 'https://hook.us2.make.com/m6bxs7mmr9qa231liqx2523b41gwl0v4';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
