@@ -3,6 +3,7 @@ const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const REDIRECT_URI = 'https://bar-ideal-reviews.vercel.app/api/auth';
 const MAKE_API_TOKEN = 'c941991c-0e0a-4e15-80fe-8425868afe57';
 const MAKE_ZONE = 'us2.make.com';
+const DATASTORE_TOKEN = 111536;
 
 export default async function handler(req, res) {
   const { code, error } = req.query;
@@ -24,26 +25,17 @@ export default async function handler(req, res) {
   });
   const tokens = await tokenRes.json();
   if (tokens.error) return res.status(400).json(tokens);
+  if (!tokens.refresh_token) return res.status(400).json({ error: 'No refresh_token', keys: Object.keys(tokens) });
   
-  // Guardar en Make data store usando PUT (crea o reemplaza)
+  // Guardar usando la Make API MCP (replace para actualizar)
   const makeHeaders = { 'Authorization': 'Token ' + MAKE_API_TOKEN, 'Content-Type': 'application/json' };
-  const saveRes = await fetch('https://' + MAKE_ZONE + '/api/v2/data-stores/111525/data/google_tokens', {
+  const saveRes = await fetch('https://' + MAKE_ZONE + '/api/v2/data-stores/' + DATASTORE_TOKEN + '/data', {
     method: 'PUT',
     headers: makeHeaders,
-    body: JSON.stringify({ 
-      key: 'google_tokens', 
-      data: { 
-        refresh_token: tokens.refresh_token, 
-        access_token: tokens.access_token, 
-        savedAt: new Date().toISOString() 
-      } 
-    })
+    body: JSON.stringify({ key: 'token', overwrite: true, data: { refresh_token: tokens.refresh_token, access_token: tokens.access_token || '', savedAt: new Date().toISOString() } })
   });
   const saved = await saveRes.json();
   
-  if (tokens.refresh_token) {
-    res.status(200).send('<h1>Autorizacion exitosa!</h1><p>Token guardado correctamente. Ya podes cerrar esta ventana.</p><p>Refresh token: ' + tokens.refresh_token.substring(0,20) + '...</p>');
-  } else {
-    res.status(400).json({ error: 'No se obtuvo refresh_token', tokens_keys: Object.keys(tokens) });
-  }
+  res.setHeader('Content-Type', 'text/html');
+  res.status(200).send('<h1>Autorizacion exitosa!</h1><p>Refresh token:</p><pre style="word-break:break-all;background:#eee;padding:10px">' + tokens.refresh_token + '</pre><p>Make save status: ' + saveRes.status + '</p><pre>' + JSON.stringify(saved) + '</pre>');
 }
